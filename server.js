@@ -1,8 +1,9 @@
-const app = require('./app');
+
 const dotenv = require('dotenv');
 const mongoose = require('mongoose')
-
 dotenv.config({ path: './config.env' });
+
+const app = require('./app');
 
 //replace password in config file
 const DB = process.env.DATABSED_CLOUD.replace(
