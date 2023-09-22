@@ -21,19 +21,17 @@ mongoose
   .then(() => {
     console.log('database connected');
   });
-
-// const testTour = new Tour({
-//   name:"The Park Camper",
-//   price:497
-// })
-
-// testTour.save().then(doc=>{
-//   console.log(doc)
-// }).catch(err=>{
-//   console.log("Error",err)
-// })
+ 
 
 const port = 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`App running on ${port}...`);
 });
+
+
+process.on('unhandledRejection', err=>{
+  console.log(err.name, err.message);
+  console.log('UNHANDLED REJECTION! Shutting down...')
+  server.close()
+  process.exit(1)
+})
