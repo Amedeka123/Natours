@@ -10,7 +10,7 @@ app.use(express.json());
 // ROUTES HANDLERS
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
-4;
+
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });

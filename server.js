@@ -6,10 +6,13 @@ dotenv.config({ path: './config.env' });
 const app = require('./app');
 
 //replace password in config file
-const DB = process.env.DATABSED_CLOUD.replace(
+const DB = process.env.DATABASED_CLOUD.replace(
   '<PASSWORD>',
   process.env.DATABASE_PASSWORD,
 );
+
+const url = "mongodb://localhost:27017/natours"
+
 // Database connection
 mongoose
   .connect(DB, {
@@ -29,9 +32,9 @@ const server = app.listen(port, () => {
 });
 
 
-process.on('unhandledRejection', err=>{
-  console.log(err.name, err.message);
-  console.log('UNHANDLED REJECTION! Shutting down...')
-  server.close()
-  process.exit(1)
-})
+ process.on('unhandledRejection', err=>{
+   console.log(err.name, err.message);
+   console.log('UNHANDLED REJECTION! Shutting down...')
+   server.close()
+   process.exit(1)
+ })
