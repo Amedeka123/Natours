@@ -11,12 +11,7 @@ const signToken = (id) => {
 };
 
 exports.signUp = catchAsync(async (req, res, next) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    confirmPassword: req.body.confirmPassword,
-  });
+  const newUser = await User.create(req.body);
   // creating of JWT token
   const token = signToken(newUser._id);
   res.status(201).json({
@@ -59,10 +54,45 @@ exports.protect = catchAsync( async(req,res,next)=>{
   }
   //Verification token
    const decoded =  await promisify(jwt.verify)(token, process.env.JWT_SECRET)
-  // console.log(decoded)
-  // // Check if user still exists
 
+  // Check if user still exists
+const freshUser = await User.findById(decoded.id)
+if(!freshUser){
+  return next( new AppError("The user belonging to this token does not exist",401))
+}
 
   // Check if user change password after the token was issued
+  const isPasswordChange = freshUser.changePasswordAfter(decoded.iat)
+   if(isPasswordChange){
+     return next( new AppError("Password has been change recently, Please login again",401))
+   }
+  // Grant access to protected route
+  req.user = freshUser
   next()
 })
+
+exports.restrictTo = (...roles) =>{
+  return (req,res,next) => {
+    if(!roles.includes(req.user.role)){
+      return next(new AppError('Please you not have the pression to perform this action',403))
+    }
+    next()
+  }
+}
+
+exports.forgetPassword = catchAsync( async (req,res,next) => { 
+  // Get user based on POSTED email
+  const user = await User.findOne({email:req.body.email})
+  // check that the user exist with that email
+  if(!user){
+    return next(new AppError('User does not exit', 404))
+  }
+
+  // Generate the random reset
+  const resetToken = user.createPasswordResetToken();
+  await user.save({validateBeforeSave:false})
+})
+
+
+exports.restPassword = (req,res,next) => { } 
+
