@@ -8,7 +8,12 @@ const Router = express.Router();
 Router.post('/signup', authController.signUp);
 Router.post('/login', authController.login);
 Router.post('/forgetPassword', authController.forgetPassword);
-Router.post('/restPassword', authController.restPassword);
+Router.patch('/resetPassword/:token', authController.restPassword);
+Router.patch('/updateMyPassword',authController.protect, authController.updatePassword)
+Router.patch('/updateUserAccount',authController.protect, userController.updateMe)
+Router.delete('/deleteUserAccount',authController.protect, userController.deleteMe)
+
+
 
 
 Router.route('/')

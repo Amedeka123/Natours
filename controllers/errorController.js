@@ -6,7 +6,6 @@ const handleCastErrorDB = (err) => {
 };
 
 const handleDuplicateFeildsDB = (err) => {
-  console.log('hello', err)
   const value = err.keyValue.name;
   const message = `Duplicate field values:${value} Please use another value!`;
   return new AppError(message, 400);
@@ -63,8 +62,6 @@ module.exports = (err, req, res, next) => {
     if (error.name === 'ValidationError')error = handleValidationErrorDB(error);
     if(error.name === "JsonWebTokenError") error = handleJWTErorr()
     if(error.name === "TokenExpiredError") error = handleTokenExpired()
-      
-
     sendErrorProd(error, res);
   }
 };
