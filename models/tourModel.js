@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator')
+//const User = require('./UserModel')
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -31,17 +32,17 @@ const tourSchema = new mongoose.Schema(
     },
     difficulty: {
       type: String,
-      required: [true, 'A tour must have a diffculty'],
+      required: [true, 'A tour must have a difficulty'],
       enum: {
-        values: ['easy', 'medium', 'difficulty'],
-        message: 'Difficulty is either: easy ,meduim,difficult',
+        values: ['easy', 'medium', 'difficult'],
+        message: 'Difficulty is either: easy,medium,difficult',
       },
     },
     ratingsAverage: {
       type: Number,
       default: 4.5,
     },
-    ratingsQuaility: {
+    ratingsQuality: {
       type: Number,
       default: 0,
     },
@@ -82,6 +83,35 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    startLocation:{
+        //GeoJson
+        type:{
+            type:String,
+            default:"Point",
+            enum:['Point']
+        },
+        coordinates:[Number],
+        address:String,
+        description:String
+    },
+  locations:[
+      {
+          type:{
+              type:String,
+              default:"Point",
+              enum:['Point']
+          },
+          coordinates:[Number],
+          address:String,
+          description:String,
+          day:Number,
+      }
+  ],
+  guides:[
+      {type:mongoose.Schema.ObjectId,
+      ref:'User'
+      }
+  ],
     slug: String,
   },
   {
@@ -93,18 +123,34 @@ const tourSchema = new mongoose.Schema(
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
+
+ tourSchema.virtual('reviews',{
+   ref:'Review',
+   localField:'_id',
+foreignField:'tour'
+ })
 // Document Middleware: runs before .save() and .create()
-//   tourSchema.pre('save',function(next){
-//   this.slug = slugify(this.name, { lower: true });
-//   next()
-//  })
+    tourSchema.pre('save',function(next){
+   this.slug = slugify(this.name, { lower: true });
+    next()
+   })
+// tourSchema.pre('save', async function (next){
+//     const guidesPromise = this.guides.map(async id => await User.findById(id) )
+//      this.guides = await Promise.all(guidesPromise)
+//     next()
+// })
 
 //  tourSchema.post('save', function(doc,next){
 //    console.log(doc)
 //    next()
 //  })
 //Query Middleware
-
+tourSchema.pre('save', function (){
+    this.populate({
+        path:'guides',
+        select: '-__v -passwordChangeAt'
+    })
+})
 //  tourSchema.pre(/^find/, function (next) {
 //    this.find({secretTour:{$ne:true}})
 //    this.start = Date.now();
